@@ -1,5 +1,11 @@
 #include <Arduino.h>
 #include "clock.h"
+#include <Wire.h>
+
+#include <OneWire.h> 
+#include <DallasTemperature.h>
+OneWire* oneWire=NULL;
+DallasTemperature* tempSensor=NULL;
 
 const char *p2dig(uint8_t v, uint8_t mode)
 // print 2 digits leading zero
@@ -54,6 +60,29 @@ void RTC_Init()
   RTC.control(DS1307_CLOCK_HALT, DS1307_OFF);
   RTC.control(DS1307_SQW_RUN, DS1307_OFF);
   RTC.control(DS1307_12H, DS1307_OFF);
+
+  if(DS18B20_PIN>=0) {
+    oneWire=new OneWire(DS18B20_PIN);        
+    tempSensor=new DallasTemperature(oneWire);
+    tempSensor->begin();
+    tempSensor->setWaitForConversion(false);
+    tempSensor->requestTemperatures();
+  }
+
+}
+
+float Temp_Read()
+{
+  static float lastTemp=0;
+
+  //needs to be async because it takes 94ms for default 9bit resolution
+  if(tempSensor!=NULL&&tempSensor->isConversionComplete())
+  {
+    lastTemp=tempSensor->getTempCByIndex(0);
+    tempSensor->requestTemperatures();
+  }
+  
+  return lastTemp;
 }
 
 void RTC_WriteTime_UTC(int yyyy,int mm, int dd, int h, int m, int s)
@@ -136,4 +165,7 @@ void RTC_ReadTime_Local()
   RTC.mm=theMonth;
   RTC.yyyy=theYear;
 }
+
+
+
 

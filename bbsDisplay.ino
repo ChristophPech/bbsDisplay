@@ -46,6 +46,12 @@ void loop()
  Serial.print(p2dig(RTC.m,DEC));
  Serial.print(":");
  Serial.print(p2dig(RTC.s,DEC));
+
+ //Serial.print(" ");
+ //Serial.print(Temp_Read());
+ //Serial.print("°C");
+
+ 
  Serial.print("\n");
 
  
