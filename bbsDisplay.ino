@@ -1,7 +1,8 @@
 #include "gfx.h"
 #include "clock.h"
 
-int RXLED = 17;
+const int RXLED = 17;
+unsigned int loopCnt=0;
 
 void setup() {
   Serial.begin(9600);
@@ -9,14 +10,16 @@ void setup() {
 
   pinMode(RXLED, OUTPUT);
 
-  //gfx_init();
-
+  gfx_init();
   RTC_Init();
+
+  //RTC_ReadTime_UTC();
   //RTC_WriteTime_UTC(2017,11,29,15,0,0);
+  //RTC_WriteTime_UTC(2017,RTC.mm,RTC.dd,RTC.h,RTC.m,RTC.s);
 }
 
 
-void loop_gfx() {
+/*void loop_gfx() {
   gfx_render();
 
   iSpeed++;
@@ -25,16 +28,16 @@ void loop_gfx() {
   if(iPas>9) iPas=0;
   
   delay(100);
-}
+}*/
 
 void loop()
 {
- Serial1.println("Hello!");  // Print "Hello!" over hardware UART
+ //Serial1.println("Hello!");  // Print "Hello!" over hardware UART
 
  //RTC.readTime();
  RTC_ReadTime_Local();
 
- Serial.print(RTC.yyyy);
+ /*Serial.print(RTC.yyyy);
  Serial.print("-");
  Serial.print(RTC.mm);
  Serial.print("-");
@@ -45,21 +48,31 @@ void loop()
  Serial.print(":");
  Serial.print(p2dig(RTC.m,DEC));
  Serial.print(":");
- Serial.print(p2dig(RTC.s,DEC));
+ Serial.print(p2dig(RTC.s,DEC));*/
 
  //Serial.print(" ");
  //Serial.print(Temp_Read());
  //Serial.print("°C");
+ //Serial.print("\n");
 
+ gfx_render();
  
- Serial.print("\n");
 
- 
+ if(loopCnt%2)
+ {
+  digitalWrite(RXLED, LOW);   // set the LED on
+  TXLED1;
+ }
+ else
+ {
+  digitalWrite(RXLED, HIGH);    // set the LED off
+  TXLED0; //TX LED is not tied to a normally controlled pin
+ }
 
- digitalWrite(RXLED, LOW);   // set the LED on
- TXLED0; //TX LED is not tied to a normally controlled pin
- delay(1000);              // wait for a second
- digitalWrite(RXLED, HIGH);    // set the LED off
- TXLED1;
- delay(1000);              // wait for a second
+ loopCnt++;
+ delay(100);
+
+ if(loopCnt==5)   iBatVolt=54800;
+ if(loopCnt==100)   iBatVolt=46100;
+
 }
