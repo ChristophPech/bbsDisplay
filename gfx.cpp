@@ -1,5 +1,6 @@
 #include "gfx.h"
 #include "clock.h"
+#include "storage.h"
 #include <U8glib.h>
 
 // Width: 16, Height: 7
@@ -13,10 +14,8 @@ U8GLIB_SSD1306_128X64 u8g( 15, 16, 10, 9, 8 );
 int iSpeed=36;
 int iPower=500;
 int iPas=0;
-long distAll=32365;
-long distTrip=38;
-long timeTrip=60*5+3600*0+12;
 long iBatVolt=40000;
+int iErrCode=0;
 
 long iBatVoltSmooth=iBatVolt;
 int iBatLevel=0;
@@ -40,17 +39,13 @@ void gfx_draw(void) {
   u8g.drawStr( 106, 40, "km/h");
   u8g.drawStr( 106, 50, "W");
 
-  sprintf(buffer, "%d km", distAll);
-  iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 1, 63, buffer);
-
-  sprintf(buffer, "%d km", distTrip);
+  sprintf(buffer, "%d km", curState.distTrip/1000);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 1, 53, buffer);
 
-  iH=timeTrip/3600;
-  iM=(timeTrip%3600)/60;
-  iS=(timeTrip%3600)%60;
+  iH=curState.timeTrip/3600;
+  iM=(curState.timeTrip%3600)/60;
+  iS=(curState.timeTrip%3600)%60;
   if(iH>0) {
     sprintf(buffer, "%d:%02d:%02d", iH,iM,iS);
   } else {
@@ -87,6 +82,40 @@ void gfx_draw(void) {
     u8g.setColorIndex(1);
   }
 
+  char* errMsg=NULL;
+  switch(iErrCode) {
+    case 0x04 : errMsg="04 Thrt high"; break;
+    case 0x05 : errMsg="05 Thrt err"; break;
+    case 0x06 : errMsg="06 Volt low"; break;
+    case 0x07 : errMsg="07 Volt high"; break;
+    case 0x08 : errMsg="08 Hall sensor"; break;
+    case 0x09 : errMsg="09 Phase line"; break;
+    case 0x10 : errMsg="10 Ctrl temp"; break;
+    case 0x11 : errMsg="11 Motor temp"; break;
+    case 0x12 : errMsg="12 Current sensor"; break;
+    case 0x13 : errMsg="13 Bat temp sensor"; break;
+    case 0x14 : errMsg="14 Mot temp sensor"; break;
+    case 0x15 : errMsg="15 Ctrl temp sensor"; break;
+    case 0x21 : errMsg="21 Speed sensor"; break;
+    case 0x22 : errMsg="22 BMS comm"; break;
+    case 0x23 : errMsg="23 Head light"; break;
+    case 0x24 : errMsg="24 Head light sensor"; break;
+    case 0x25 : errMsg="25 TSensor torque"; break;
+    case 0x26 : errMsg="26 TSensor speed"; break;
+    case 0x30 : errMsg="30 Communication"; break;
+  }
+  if(errMsg)
+  {
+    iW=u8g.getStrWidth(errMsg);
+    u8g.drawStr( 128-iW, 63, errMsg);
+  }
+  else
+  {
+    sprintf(buffer, "%d km", curState.distAll/1000);
+    iW=u8g.getStrWidth(buffer);
+    u8g.drawStr( 1, 63, buffer);
+  }
+
   ////////////////////////////////////////////////////////////////////
   u8g.setFont(u8g_font_8x13Br);
   const char* pas[]={"off","eco","normal","turbo",">",">>",">>>",">>>>",">>>>>",">>>>>>"};
@@ -110,14 +139,14 @@ void gfx_draw(void) {
 
 }
 
-void gfx_init()
+void Gfx_Init()
 {
     u8g.begin();
     u8g.setColorIndex(1); 
     pinMode(8, OUTPUT);
 }
 
-void gfx_render()
+void Gfx_Render()
 {
   iBatVoltSmooth=(iBatVoltSmooth*80)/100;
   iBatVoltSmooth+=(iBatVolt/100)*20;
