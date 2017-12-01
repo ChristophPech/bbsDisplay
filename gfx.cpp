@@ -11,8 +11,8 @@ const unsigned char imgBatt[] PROGMEM = {
 U8GLIB_SSD1306_128X64 u8g( 15, 16, 10, 9, 8 );
 //U8G2_SSD1306_128X64_NONAME_1_4W_SW_SPI u8g(U8G2_R0, /* clock=*/ 15, /* data=*/ 16, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
 
-int iSpeed=36;
-int iPower=500;
+long iSpeed=350;
+int iPower=0;
 int iPas=0;
 long iBatVolt=40000;
 int iErrCode=0;
@@ -36,10 +36,10 @@ void gfx_draw(void) {
   iW=4*8;
   u8g.drawStr( 128-iW, 6, buffer);
 
-  u8g.drawStr( 106, 40, "km/h");
-  u8g.drawStr( 106, 50, "W");
+  u8g.drawStr( 106, 40, Label_Speed);
+  if(iPower>0) u8g.drawStr( 106, 50, "W");
 
-  sprintf(buffer, "%d km", curState.distTrip/1000);
+  sprintf(buffer, "%d %s", curState.distTrip/1000,Label_Dist);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 1, 53, buffer);
 
@@ -57,7 +57,7 @@ void gfx_draw(void) {
 
   sprintf(buffer, "%d", iPower);
   iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 100-iW, 50, buffer);
+  if(iPower>0) u8g.drawStr( 100-iW, 50, buffer);
 
   u8g.drawXBMP( 1, 10, 16, 7, imgBatt);
   int v=(iBatVoltSmooth+50)/100;
@@ -82,7 +82,7 @@ void gfx_draw(void) {
     u8g.setColorIndex(1);
   }
 
-  char* errMsg=NULL;
+  const char* errMsg=NULL;
   switch(iErrCode) {
     case 0x04 : errMsg="04 Thrt high"; break;
     case 0x05 : errMsg="05 Thrt err"; break;
@@ -111,15 +111,15 @@ void gfx_draw(void) {
   }
   else
   {
-    sprintf(buffer, "%d km", curState.distAll/1000);
+    sprintf(buffer, "%d %s", curState.distAll/1000,Label_Dist);
     iW=u8g.getStrWidth(buffer);
     u8g.drawStr( 1, 63, buffer);
   }
 
   ////////////////////////////////////////////////////////////////////
   u8g.setFont(u8g_font_8x13Br);
-  const char* pas[]={"off","eco","normal","turbo",">",">>",">>>",">>>>",">>>>>",">>>>>>"};
-  sprintf(buffer, "%s", pas[iPas]);
+  const char* pas[]={"push","off","eco","normal","turbo",">",">>",">>>",">>>>",">>>>>",">>>>>>"};
+  sprintf(buffer, "%s", pas[iPas+1]);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 64-iW/2, 10, buffer);
 
@@ -128,11 +128,12 @@ void gfx_draw(void) {
   //u8g.setFont(u8g2_font_courB24_tn);
   u8g.setFont(u8g_font_helvB24n);
 
-  sprintf(buffer, "%d", iSpeed%10);
+  iS=iSpeed/1000;
+  sprintf(buffer, "%d", iS%10);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 98-iW, 40, buffer);
   if(iSpeed>10) {
-    sprintf(buffer, "%d", iSpeed/10);
+    sprintf(buffer, "%d", iS/10);
     iW=u8g.getStrWidth(buffer);
     u8g.drawStr( 78-iW, 40, buffer);
   }

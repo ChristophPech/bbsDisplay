@@ -1,14 +1,14 @@
 #include "gfx.h"
 #include "clock.h"
 #include "storage.h"
+#include "comm.h"
 
 const int RXLED = 17;
 unsigned int loopCnt=0;
 
 void setup() {
   Serial.begin(9600);
-  Serial1.begin(1200);
-
+  Comm_Init();
   pinMode(RXLED, OUTPUT);
 
   Gfx_Init();
@@ -18,6 +18,15 @@ void setup() {
   //RTC_ReadTime_UTC();
   //RTC_WriteTime_UTC(2017,11,29,15,0,0);
   //RTC_WriteTime_UTC(2017,RTC.mm,RTC.dd,RTC.h,RTC.m,RTC.s);
+
+  //Timer0 1ms interrupt
+  OCR0A = 0xAF;
+  TIMSK0 |= _BV(OCIE0A);
+}
+
+SIGNAL(TIMER0_COMPA_vect)
+{
+  Comm_Tick();
 }
 
 
@@ -40,6 +49,9 @@ void Test()
  //DumpRAM();
  //DumpROM();
  //Storage_Init();
+
+ int w=Serial1.availableForWrite();
+ Serial.println(w);
 }
 
 void loop()

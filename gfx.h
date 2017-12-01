@@ -1,7 +1,20 @@
 #pragma once
 #include <Arduino.h>
 
-extern int iSpeed;
+////////////////////////////////////////////////////////////////////////////////////////////
+/// configure display
+#define METRIC
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef METRIC
+const char* const Label_Speed PROGMEM = "km/h";
+const char* const Label_Dist PROGMEM = "km";
+#else
+const char* const Label_Speed PROGMEM = "mp/h";
+const char* const Label_Dist PROGMEM = "mi";
+#endif
+
+extern long iSpeed;     //in 1/1000 km/h or mp/h
 extern int iPower;
 extern int iPas;
 extern long iBatVolt;  //in mV
