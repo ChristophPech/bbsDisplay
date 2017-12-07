@@ -1,6 +1,7 @@
 #include "gfx.h"
 #include "clock.h"
 #include "storage.h"
+#include "ctrl.h"
 #include <U8glib.h>
 
 // Width: 16, Height: 7
@@ -19,6 +20,9 @@ int iErrCode=0;
 
 long iBatVoltSmooth=iBatVolt;
 int iBatLevel=0;
+long iSpeed_copy=0;
+int iPower_copy=0;
+int iPas_copy=0;
 
 void gfx_draw(void) {
   char buffer[32];
@@ -33,11 +37,11 @@ void gfx_draw(void) {
   iS=(millis()/1000)%60;
   sprintf(buffer, "%02d:%02d:%02d",RTC.h,RTC.m, RTC.s);
   //iW=u8g.getStrPixelWidth(buffer);
-  iW=4*8;
+  iW=4*8+3;
   u8g.drawStr( 128-iW, 6, buffer);
 
   u8g.drawStr( 106, 40, Label_Speed);
-  if(iPower>0) u8g.drawStr( 106, 50, "W");
+  if(!modeRoad) u8g.drawStr( 106, 50, "W");
 
   sprintf(buffer, "%d %s", curState.distTrip/1000,Label_Dist);
   iW=u8g.getStrWidth(buffer);
@@ -55,9 +59,9 @@ void gfx_draw(void) {
   u8g.drawStr( 1, 46, buffer);
 
 
-  sprintf(buffer, "%d", iPower);
+  sprintf(buffer, "%d", iPower_copy);
   iW=u8g.getStrWidth(buffer);
-  if(iPower>0) u8g.drawStr( 100-iW, 50, buffer);
+  if(!modeRoad) u8g.drawStr( 100-iW, 50, buffer);
 
   u8g.drawXBMP( 1, 10, 16, 7, imgBatt);
   int v=(iBatVoltSmooth+50)/100;
@@ -119,7 +123,7 @@ void gfx_draw(void) {
   ////////////////////////////////////////////////////////////////////
   u8g.setFont(u8g_font_8x13Br);
   const char* pas[]={"push","off","eco","normal","turbo",">",">>",">>>",">>>>",">>>>>",">>>>>>"};
-  sprintf(buffer, "%s", pas[iPas+1]);
+  sprintf(buffer, "%s", pas[iPas_copy+1]);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 64-iW/2, 10, buffer);
 
@@ -128,11 +132,11 @@ void gfx_draw(void) {
   //u8g.setFont(u8g2_font_courB24_tn);
   u8g.setFont(u8g_font_helvB24n);
 
-  iS=iSpeed/1000;
+  iS=iSpeed_copy/1000;
   sprintf(buffer, "%d", iS%10);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 98-iW, 40, buffer);
-  if(iSpeed>10) {
+  if(iSpeed_copy>10) {
     sprintf(buffer, "%d", iS/10);
     iW=u8g.getStrWidth(buffer);
     u8g.drawStr( 78-iW, 40, buffer);
@@ -182,6 +186,11 @@ void Gfx_Render()
   {
     iBatLevel=iBatLevelDn;
   }
+
+  //copy values so they don't change in between rendering slices
+  iSpeed_copy=iSpeed;
+  iPower_copy=iPower;
+  iPas_copy=iPas;
   
   u8g.firstPage();
   do {

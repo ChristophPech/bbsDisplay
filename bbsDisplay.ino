@@ -2,6 +2,7 @@
 #include "clock.h"
 #include "storage.h"
 #include "comm.h"
+#include "ctrl.h"
 
 const int RXLED = 17;
 unsigned int loopCnt=0;
@@ -14,9 +15,10 @@ void setup() {
   Gfx_Init();
   RTC_Init();
   Storage_Init();
+  Ctrl_Init();
 
   //RTC_ReadTime_UTC();
-  //RTC_WriteTime_UTC(2017,11,29,15,0,0);
+  //RTC_WriteTime_UTC(2017,12,7,14,35,0);
   //RTC_WriteTime_UTC(2017,RTC.mm,RTC.dd,RTC.h,RTC.m,RTC.s);
 
   //Timer0 1ms interrupt
@@ -26,6 +28,7 @@ void setup() {
 
 SIGNAL(TIMER0_COMPA_vect)
 {
+  Ctrl_Tick();
   Comm_Tick();
 }
 
@@ -50,8 +53,8 @@ void Test()
  //DumpROM();
  //Storage_Init();
 
- int w=Serial1.availableForWrite();
- Serial.println(w);
+ //int w=Serial1.availableForWrite();
+ //Serial.println(w);
 }
 
 void loop()
