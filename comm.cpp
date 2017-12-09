@@ -1,5 +1,6 @@
 #include "comm.h"
 #include "gfx.h"
+#include "clock.h"
 
 bool bLightOn=false;
 
@@ -153,6 +154,13 @@ void RecvBattery()
 unsigned int cmdCycle=-1;
 void Comm_Tick()
 {
+    /*int r=Serial1.available();
+    if(r>0) {
+      uint8_t b0=Serial1.read();
+      Serial.print(p2dig(b0,HEX));
+      Serial.print(" ");
+    }*/
+  
   switch(iCurRequest)
   {
     case 1:RecvSpeed(); return;
@@ -175,7 +183,7 @@ void Comm_Tick()
   if(cmdCycle==21) {ReqStatus();return;};
   if(cmdCycle==22) {ReqPower();return;};
 
-  cmdCycle=-1;
+  if(cmdCycle>=30) {cmdCycle=-1;return;};
 }
 
 void Comm_Init()
