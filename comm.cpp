@@ -1,6 +1,7 @@
 #include "comm.h"
 #include "gfx.h"
 #include "clock.h"
+#include "ctrl.h"
 
 bool bLightOn=false;
 
@@ -23,9 +24,9 @@ void SendPAS()
   }
   
   Serial1.write(uint8_t(0x16));
-  Serial1.write(uint8_t(0x1b));
+  Serial1.write(uint8_t(0x0b));
   Serial1.write(uint8_t(i));
-  Serial1.write(uint8_t(i+21));
+  Serial1.write(uint8_t(i+0x21));
 }
 
 void SendLight()
@@ -36,12 +37,18 @@ void SendLight()
 }
 void SendCfg()
 {
-  //no idea, just captured it
+  uint8_t v0=Config_Road_01;
+  uint8_t v1=Config_Road_01;
+  if(!modeRoad) {
+    v0=Config_OffR_01;
+    v1=Config_OffR_02;
+  }
+  
   Serial1.write(uint8_t(0x16));
   Serial1.write(uint8_t(0x1f));
-  Serial1.write(uint8_t(0x01));
-  Serial1.write(uint8_t(0xb0));
-  Serial1.write(uint8_t(0xe6));
+  Serial1.write(uint8_t(v0));
+  Serial1.write(uint8_t(v1));
+  Serial1.write(uint8_t(v0+v1+0x35));
 }
 
 ////////////////////////////////////////////////////////////////
@@ -188,7 +195,7 @@ void Comm_Tick()
 
 void Comm_Init()
 {
-    pinMode(0, INPUT_PULLUP);
+    //pinMode(0, INPUT_PULLUP);
     Serial1.begin(1200);
 }
 

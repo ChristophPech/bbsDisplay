@@ -51,13 +51,14 @@ void OnBtnClick(int btn,int mode)
   for(int i=0;i<sizeof(ROADMODE_SEQ);i++) {
     uint8_t v=pgm_read_byte_near(ROADMODE_SEQ+i);
     if(v!=curSeq[i]) {
-      /*Serial.print("seq:");
+      /*
+      Serial.print("seq:");
       Serial.print(i);
       Serial.print(" ");
       Serial.print(v);
       Serial.print(",");
       Serial.print(curSeq[i]);
-      Serial.print("\n");*/
+      Serial.print("\n");/**/
       return;
     }
   }
@@ -149,7 +150,7 @@ void Ctrl_Tick()
   }
   if(Pin_ThrottleOut)
   {
-    int i=iThrottle/39;
+    int i=25+(iThrottle/55);
     if(i>255) i=255;
     if(modeRoad) i=0;
     analogWrite(Pin_ThrottleOut,i);

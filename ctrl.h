@@ -16,6 +16,7 @@ const int Throttle_Scale_Max=855;
 const int Throttle_RampUpTime0=2000;      //ramp up time in ms at 0 speed (must be <= 10000 (10s))
 const int Throttle_RampUpTime1=0;         //ramp up time in ms at RampUpMaxSpeed
 const int Throttle_RampUpMaxSpeed=15;     //ramp up time will scale linearly between 0 and RampUpMaxSpeed 
+///-> output will be 0.5V to 4.0V
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 const int Seq_End=0;

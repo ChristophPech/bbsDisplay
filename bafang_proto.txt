@@ -1,0 +1,68 @@
+Display -> Motor
+	
+	0x00 Idle
+
+	0x16 Cmd
+		0x0b PAS
+			160bxxxx = Pas (int)xxxx 0=PAS,1=checksum+21
+				0021 : 0
+				0122 : 1
+				0b2c : 2
+				0c2d : 3
+				0d2e : 4
+				0223 : 5
+				1536 : 6
+				1637 : 7
+				1738 : 8
+				0324 : 9
+				0627 : P (6 km/h push mode)
+
+		0x1a Light
+			161af0 Light off
+			161af1 Light on
+		0x1f ?
+			161f01b0e6 //60kmh limit
+			161f01a9df //59kmh limit (-7)
+			161f01a2d8 //58kmh limit (-7)
+			161f019ad0 //57kmh limit (-7)
+			161f0185bb //54kmh limit (-8)
+			161f01689e //50kmh limit
+			161f00b4e9 //25kmh limit, 29in
+			161f00ace1 //24kmh limit, 29in (-8)
+			161f00a5da //23kmh limit, 29in (-7)
+
+			161f00c8fd //25kmh,26 inch wheel
+			161f028dc4 //25kmh,8 inch wheel
+			161f006095 //12kmh,26 inch wheel
+			161f005C91 //12kmh,27 inch wheel
+			161f00598e //12kmh,28 inch wheel
+
+	
+	0x11 Data
+		0x20 Speed
+			return xxxxxx = km/h, 0=(Speed>8)&0xff,1=Speed&0xff,2=checksum+20
+		0x08 Status/Error
+			return 01 = normal, 03 = braking, 21 = speed sensor error
+		0x0a Power
+			return xxxx = Watts, 0=W,1=checksum+0
+		0x31 ?
+			return 3030
+		0x11 Battery
+			return xxxx = V, 0=Battery_Percent,1=checksum+0
+		
+		
+ODO 4656
+Thumb: 215-850
+
+28 = 5.6 (40 -> 0.14)
+3c = 8.3 (60 -> 0.13833)
+b4 = 25.0 (180 -> 0.13888)
+0176 = 52.0 (374 -> 0.139)
+
+
+-> km/h = 0.06 * Tire_Circum_m * Speed_raw
+
+
+Black - Blue = +
+Black - Green = -
+Yellow - Red = On/Off
