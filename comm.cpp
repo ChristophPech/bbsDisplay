@@ -188,6 +188,7 @@ void Comm_Tick()
 
 void Comm_Init()
 {
+    pinMode(0, INPUT_PULLUP);
     Serial1.begin(1200);
 }
 

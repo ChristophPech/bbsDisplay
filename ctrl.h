@@ -4,9 +4,18 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// configure ctrl
 /// inputs are configured as INPUT_PULLUP, 0=not used
-const int Pin_Plus=6;
-const int Pin_Minus=7;
+const int Pin_Plus=7;
+const int Pin_Minus=6;
 const int Pin_Mid=0;
+const int Pin_ThrottleIn=A2;    //analog input
+const int Pin_ThrottleOut=5;   //PWM output, do not change, PWM frequency settings depend on it
+
+/// Throttle configuration
+const int Throttle_Scale_Min=215;
+const int Throttle_Scale_Max=855;
+const int Throttle_RampUpTime0=2000;      //ramp up time in ms at 0 speed (must be <= 10000 (10s))
+const int Throttle_RampUpTime1=0;         //ramp up time in ms at RampUpMaxSpeed
+const int Throttle_RampUpMaxSpeed=15;     //ramp up time will scale linearly between 0 and RampUpMaxSpeed 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 const int Seq_End=0;

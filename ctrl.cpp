@@ -12,6 +12,8 @@ uint16_t Released_Mid=0;
 bool modeRoad=true;
 uint8_t curSeq[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //32+3
 
+long throttleScaled=0;
+
 void OnPAS(int val)
 {
   iPas+=val;
@@ -76,6 +78,12 @@ void Ctrl_Init()
   if(Pin_Plus) pinMode(Pin_Plus, INPUT_PULLUP);
   if(Pin_Minus) pinMode(Pin_Minus, INPUT_PULLUP);
   if(Pin_Mid) pinMode(Pin_Mid, INPUT_PULLUP);
+  if(Pin_ThrottleIn) {pinMode(Pin_ThrottleIn,INPUT);}
+
+  //pin5 PWM set to 32khz
+  TCCR3B = _BV(CS00);
+  pinMode(Pin_ThrottleOut, OUTPUT);
+  analogWrite(5,255);
 }
 
 //key debouncing 5ms
@@ -108,6 +116,52 @@ void Ctrl_Tick()
   int iP=HandleBtn(Pin_Plus,Pressed_Plus,Released_Plus);
   int iM=HandleBtn(Pin_Minus,Pressed_Minus,Released_Minus);
   int iI=HandleBtn(Pin_Mid,Pressed_Mid,Released_Mid);
+  
+  if(Pin_ThrottleIn) {
+    int v=analogRead(Pin_ThrottleIn);
+    v-=Throttle_Scale_Min;
+    if(v<0) v=0;
+    v=long(v)*10000/(Throttle_Scale_Max-Throttle_Scale_Min);
+    if(v>10000) v=10000;
+    //throttleScaled=v;
+
+    if(v<iThrottle||Throttle_RampUpMaxSpeed<=0) {
+      iThrottle=v;
+    }
+    else if(v>iThrottle)
+    {
+      //iSpeed=80*1000;
+      long s=iSpeed/(Throttle_RampUpMaxSpeed);
+      if(s>1000) s=1000;
+
+      s=(Throttle_RampUpTime0*(1000-s))+(Throttle_RampUpTime1*s);
+      s/=1000;
+      if(s<1) {
+        iThrottle=v;
+      } else {
+        s=long(10000)/s;
+        iThrottle+=s;
+        if(iThrottle>v) iThrottle=v;
+      }
+    }
+    
+    //iThrottle=throttleScaled;
+  }
+  if(Pin_ThrottleOut)
+  {
+    int i=iThrottle/39;
+    if(i>255) i=255;
+    if(modeRoad) i=0;
+    analogWrite(Pin_ThrottleOut,i);
+  }
+  if(modeRoad)
+  {
+    if(iThrottle>=5000) {
+      iPas=-1;
+    } else {
+      if(iPas==-1) iPas=0;
+    }
+  }
 
 static int iP_l=0;
 static int iM_l=0;
@@ -122,13 +176,15 @@ static int iI_l=0;
 
   /*static uint16_t ctrlTickCnt=0;
   ctrlTickCnt++;
-  //if(ctrlTickCnt%100==0) {
-  if(iP_l!=iP||iM_l!=iM) {
-    Serial.print(iP);
-    Serial.print(",");
-    Serial.print(iM);
+  if(ctrlTickCnt%100==0) {
+  //if(iP_l!=iP||iM_l!=iM) {
+    Serial.print(throttleScaled);
+  
+    //Serial.print(iP);
+    //Serial.print(",");
+    //Serial.print(iM);
     Serial.print("\n");
-  }*/
+  }/**/
 
   iP_l=iP;
   iM_l=iM;

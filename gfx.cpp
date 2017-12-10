@@ -17,6 +17,7 @@ int iPower=0;
 int iPas=0;
 long iBatVolt=40000;
 int iErrCode=0;
+int iThrottle=0;
 
 long iBatVoltSmooth=iBatVolt;
 int iBatLevel=0;
@@ -142,6 +143,10 @@ void gfx_draw(void) {
     u8g.drawStr( 78-iW, 40, buffer);
   }
 
+  if(!modeRoad) {
+    iW=(iThrottle/500);
+    u8g.drawHLine(128-iW,63,iW);
+  }
 }
 
 void Gfx_Init()
