@@ -12,7 +12,7 @@ const int RAM_Offs=8; //DS1307 ram has 64B but 7 are used by the clock
 const int RAM_Size=64-RAM_Offs;
 
 const int ROM_Offs=0; //reserved for settings
-const int ROM_Size=E2END-(1+ROM_Offs); //EEPROM size
+const int ROM_Size=(1+E2END)-ROM_Offs; //EEPROM size
 
 struct PersState {
   long distAll;     //in m
