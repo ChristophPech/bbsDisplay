@@ -78,6 +78,7 @@ PersState curState;
 int lastSecond=0;
 int saveROMCounter=0;
 
+/*
 void SaveRAM()
 {
   curRAMIdx++;
@@ -85,7 +86,7 @@ void SaveRAM()
 
   curState.SaveCrc();
   RTC.writeRAM(RAM_Offs+curRAMIdx*sizeof(curState),(uint8_t*)&curState,sizeof(curState));
-}
+}*/
 
 void SaveROM() 
 {
@@ -110,19 +111,19 @@ void Storage_Tick()
   curState.timeTrip++;
   
   saveROMCounter++;
-  if(saveROMCounter>=60)
+  if(saveROMCounter>=10)
   {
     saveROMCounter=0;
     SaveROM();
     return;
   }
-  SaveRAM();
+  //SaveRAM();
 }
 
 void Storage_Init()
 {
   //curState.timeAll=0;
-  for(int i=0;i<RAM_Chunks;i++) 
+  /*for(int i=0;i<RAM_Chunks;i++) 
   {
     PersState s;
     RTC.readRAM(RAM_Offs+i*sizeof(s),(uint8_t*)&s,sizeof(s));
@@ -134,7 +135,7 @@ void Storage_Init()
       //Serial.print("LoadRAM:");
       //Serial.println(curRAMIdx);
     }
-  }
+  }*/
 
   //curState.timeAll=0;
   for(int i=0;i<ROM_Chunks;i++) 

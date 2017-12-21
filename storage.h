@@ -15,9 +15,9 @@ const int ROM_Offs=0; //reserved for settings
 const int ROM_Size=(1+E2END)-ROM_Offs; //EEPROM size
 
 struct PersState {
-  long distAll;     //in m
+  long distAll;     //in cm
   long timeAll;     //in s
-  long distTrip;    //in m
+  long distTrip;    //in cm
   long timeTrip;    //in s
   long crc;
 

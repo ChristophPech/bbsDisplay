@@ -57,6 +57,7 @@ uint8_t htoi(char c)
 
 void RTC_Init()
 {
+#if defined(CLOCK_DS1307)
   RTC.control(DS1307_CLOCK_HALT, DS1307_OFF);
   RTC.control(DS1307_SQW_RUN, DS1307_OFF);
   RTC.control(DS1307_12H, DS1307_OFF);
@@ -68,7 +69,11 @@ void RTC_Init()
     tempSensor->setWaitForConversion(false);
     tempSensor->requestTemperatures();
   }
-
+#elif defined(CLOCK_DS3231)
+  RTC.control(DS3231_CLOCK_HALT, DS3231_OFF);
+  RTC.control(DS3231_SQW_ENABLE, DS3231_OFF);
+  RTC.control(DS3231_12H, DS3231_OFF);
+#endif
 }
 
 float Temp_Read()
@@ -122,8 +127,10 @@ void RTC_ReadTime_Local()
     daysPerMonth[1] = 29; // leap year
   }
 
+  int dst_b=pgm_read_word_near(DSTBegin+(theYear - DSTYearOfs));
+  int dst_e=pgm_read_word_near(DSTEnd+(theYear - DSTYearOfs));
   // ------------------- dst time zone --------
-  if (theMonth * 100 + theDay >= DSTBegin[theYear - DSTYearOfs] && theMonth * 100 + theDay < DSTEnd[theYear - DSTYearOfs]) {
+  if (theMonth * 100 + theDay >= dst_b && theMonth * 100 + theDay < dst_e) {
     theHour += TimeZoneDST;
   } else {
     // --------------------normal time zone --------

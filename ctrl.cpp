@@ -1,6 +1,7 @@
 #include "ctrl.h"
 #include "gfx.h"
 #include "clock.h"
+#include "storage.h"
 
 uint16_t Pressed_Plus=0;
 uint16_t Pressed_Minus=0;
@@ -13,6 +14,11 @@ bool modeRoad=true;
 uint8_t curSeq[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //32+3
 
 long throttleScaled=0;
+long batterySum=0;
+long batteryCount=0;
+
+long moveSum=0;
+long moveMSCount=0;
 
 void OnPAS(int val)
 {
@@ -31,10 +37,16 @@ void OnPAS(int val)
   return;
 }
 
+void OnClearTrip() {
+  curState.distTrip=0;
+  curState.timeTrip=0;
+}
+
 void OnBtnClick(int btn,int mode)
 {
   if(btn==Btn_Plus&&mode==Seq_Norm) OnPAS(1);
   if(btn==Btn_Minus&&mode==Seq_Norm) OnPAS(-1);
+  if(btn==Btn_Mid&&mode==Seq_Long) OnClearTrip();
 
   //record sequence
   int iSIdx=-1;
@@ -117,9 +129,27 @@ void Ctrl_Tick()
   int iP=HandleBtn(Pin_Plus,Pressed_Plus,Released_Plus);
   int iM=HandleBtn(Pin_Minus,Pressed_Minus,Released_Minus);
   int iI=HandleBtn(Pin_Mid,Pressed_Mid,Released_Mid);
-  
+
+  if(Pin_BatVolt) {
+    static int bat_smaple_tick=0;
+    bat_smaple_tick++;
+    if(bat_smaple_tick>=1)
+    {
+      bat_smaple_tick=0;
+      int v=analogRead(Pin_BatVolt);
+      batterySum+=v;
+      batteryCount++;
+      if(batteryCount>=1000) {
+        iBatVolt=(batterySum*Battery_mV_per_count)/(batteryCount*1);
+        //throttleScaled=iBatVolt;
+        batterySum=0;
+        batteryCount=0;
+      }
+    };
+  }
   if(Pin_ThrottleIn) {
     int v=analogRead(Pin_ThrottleIn);
+    //throttleScaled=v;
     v-=Throttle_Scale_Min;
     if(v<0) v=0;
     v=long(v)*10000/(Throttle_Scale_Max-Throttle_Scale_Min);
@@ -175,7 +205,8 @@ static int iI_l=0;
   if(iM==0&&iM_l>0) OnBtnClick(Btn_Minus,iM_l<5?Seq_Norm:Seq_Long);
   if(iI==0&&iI_l>0) OnBtnClick(Btn_Mid,iI_l<5?Seq_Norm:Seq_Long);
 
-  /*static uint16_t ctrlTickCnt=0;
+  /*   
+  static uint16_t ctrlTickCnt=0;
   ctrlTickCnt++;
   if(ctrlTickCnt%100==0) {
   //if(iP_l!=iP||iM_l!=iM) {
@@ -190,5 +221,23 @@ static int iI_l=0;
   iP_l=iP;
   iM_l=iM;
   iI_l=iI;
+
+  static unsigned long lastTime=micros();
+  unsigned long curTime=micros();
+  unsigned long iDiff=curTime-lastTime;
+  if(iDiff>=1000) {
+    unsigned long iMS=iDiff/1000;
+    moveSum+=iSpeed*iMS;
+    lastTime+=1000*iMS;
+    moveMSCount++;
+  }
+  if(moveMSCount>=1000) {
+    unsigned long iMetersMoved=(moveSum/360)/moveMSCount;
+    moveMSCount=0;
+    moveSum=0;
+    curState.distTrip+=iMetersMoved;
+    curState.distAll+=iMetersMoved;
+  }
+  
 }
 

@@ -4,6 +4,8 @@
 #include "ctrl.h"
 
 bool bLightOn=false;
+int recvTimeOut=0;
+int recvLastBytes=0;
 
 void SendPAS()
 {
@@ -38,7 +40,7 @@ void SendLight()
 void SendCfg()
 {
   uint8_t v0=Config_Road_01;
-  uint8_t v1=Config_Road_01;
+  uint8_t v1=Config_Road_02;
   if(!modeRoad) {
     v0=Config_OffR_01;
     v1=Config_OffR_02;
@@ -59,18 +61,21 @@ void ReqSpeed()
   Serial1.write(uint8_t(0x11));
   Serial1.write(uint8_t(0x20));
   iCurRequest=1;
+  recvLastBytes=-1;
 }
 void ReqStatus()
 {
   Serial1.write(uint8_t(0x11));
   Serial1.write(uint8_t(0x08));
   iCurRequest=2;
+  recvLastBytes=-1;
 }
 void ReqPower()
 {
   Serial1.write(uint8_t(0x11));
   Serial1.write(uint8_t(0x0a));
   iCurRequest=3;
+  recvLastBytes=-1;
 }
 void ReqSomething()
 {
@@ -78,6 +83,7 @@ void ReqSomething()
   Serial1.write(uint8_t(0x11));
   Serial1.write(uint8_t(0x31));
   iCurRequest=4;
+  recvLastBytes=-1;
 }
 void ReqBattery()
 {
@@ -85,6 +91,7 @@ void ReqBattery()
   Serial1.write(uint8_t(0x11));
   Serial1.write(uint8_t(0x11));
   iCurRequest=5;
+  recvLastBytes=-1;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -161,36 +168,72 @@ void RecvBattery()
 unsigned int cmdCycle=-1;
 void Comm_Tick()
 {
+  int w=Serial1.availableForWrite();
+  if(w<63) return;
+  //Serial.println(w);
+  
     /*int r=Serial1.available();
     if(r>0) {
       uint8_t b0=Serial1.read();
       Serial.print(p2dig(b0,HEX));
       Serial.print(" ");
     }*/
-  
-  switch(iCurRequest)
+
+  if(iCurRequest)
   {
-    case 1:RecvSpeed(); return;
-    case 2:RecvStatus(); return;
-    case 3:RecvPower(); return;
-    case 4:RecvSomething(); return;
-    case 5:RecvBattery(); return;
-    case -1: while(Serial1.available()) {Serial1.read();}; iCurRequest=0; return; //flush read buffer
+    if(recvLastBytes==-1) {
+      recvLastBytes=0;
+      recvTimeOut=30;
+      //Serial.print("\nto");
+      //Serial.print(iCurRequest);
+    } else {
+      int r=Serial1.available();
+      if(r!=recvLastBytes) {
+        recvTimeOut=15;
+        recvLastBytes=r;
+        //Serial.print("+");
+      } else {
+        recvTimeOut--;
+        //Serial.print("-");
+        if(recvTimeOut<=0) {
+          //Serial.print("end");
+          iCurRequest=0; //timeout
+        }
+        return;
+      }
+    }
+    
+    switch(iCurRequest)
+    {
+      case 1:RecvSpeed(); return;
+      case 2:RecvStatus(); return;
+      case 3:RecvPower(); return;
+      case 4:RecvSomething(); return;
+      case 5:RecvBattery(); return;
+      case -1: 
+        while(Serial1.available()) {
+          char a=Serial1.read();
+          Serial.print(a);
+        };
+        iCurRequest=0; return; //flush read buffer
+    }
   }
   
-  int w=Serial1.availableForWrite();
+  
   if(w<63) return;
+  //Serial.println(w);
   cmdCycle++;
 
-  if(cmdCycle==10) {SendPAS();return;};
-  if(cmdCycle==11) {SendLight();return;};
-  if(cmdCycle==12) {SendCfg();return;};
+  if(cmdCycle==10) {ReqSpeed();return;};
+  if(cmdCycle==20) {SendPAS();return;};
 
-  if(cmdCycle==20) {ReqSpeed();return;};
-  if(cmdCycle==21) {ReqStatus();return;};
-  if(cmdCycle==22) {ReqPower();return;};
+  if(cmdCycle==40) {ReqStatus();return;};
+  if(cmdCycle==50) {SendLight();return;};
 
-  if(cmdCycle>=30) {cmdCycle=-1;return;};
+  if(cmdCycle==70) {ReqPower();return;};
+  if(cmdCycle==80) {SendCfg();return;};
+
+  if(cmdCycle>=90) {cmdCycle=-1;return;};
 }
 
 void Comm_Init()

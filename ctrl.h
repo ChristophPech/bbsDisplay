@@ -4,11 +4,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// configure ctrl
 /// inputs are configured as INPUT_PULLUP, 0=not used
-const int Pin_Plus=7;
+const int Pin_Plus=4;
 const int Pin_Minus=6;
-const int Pin_Mid=0;
-const int Pin_ThrottleIn=A2;    //analog input
+const int Pin_Mid=7;
+const int Pin_ThrottleIn=A1;   //analog input
 const int Pin_ThrottleOut=5;   //PWM output, do not change, PWM frequency settings depend on it
+const int Pin_BatVolt=A2;      //battery voltage
+const long Battery_mV_per_count=61;
 
 /// Throttle configuration
 const int Throttle_Scale_Min=215;

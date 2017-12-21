@@ -7,11 +7,11 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef METRIC
-const char* const Label_Speed PROGMEM = "km/h";
-const char* const Label_Dist PROGMEM = "km";
+const char* const Label_Speed = "km/h";
+const char* const Label_Dist = "km";
 #else
-const char* const Label_Speed PROGMEM = "mp/h";
-const char* const Label_Dist PROGMEM = "mi";
+const char* const Label_Speed = "mp/h";
+const char* const Label_Dist = "mi";
 #endif
 
 extern long iSpeed;     //in 1/1000 km/h or mp/h

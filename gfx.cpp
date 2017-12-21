@@ -44,7 +44,8 @@ void gfx_draw(void) {
   u8g.drawStr( 106, 40, Label_Speed);
   if(!modeRoad) u8g.drawStr( 106, 50, "W");
 
-  sprintf(buffer, "%d %s", curState.distTrip/1000,Label_Dist);
+  long dm=curState.distTrip/10;
+  sprintf(buffer, "%ld.%03ld %s", dm/1000,dm%1000,Label_Dist);
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 1, 53, buffer);
 
@@ -116,7 +117,7 @@ void gfx_draw(void) {
   }
   else
   {
-    sprintf(buffer, "%d %s", curState.distAll/1000,Label_Dist);
+    sprintf(buffer, "%ld %s", curState.distAll/10000,Label_Dist);
     iW=u8g.getStrWidth(buffer);
     u8g.drawStr( 1, 63, buffer);
   }
