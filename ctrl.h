@@ -10,11 +10,11 @@ const int Pin_Mid=7;
 const int Pin_ThrottleIn=A1;   //analog input
 const int Pin_ThrottleOut=5;   //PWM output, do not change, PWM frequency settings depend on it
 const int Pin_BatVolt=A2;      //battery voltage
-const long Battery_mV_per_count=61;
+const long Battery_100uV_per_count=679; //596;
 
 /// Throttle configuration
 const int Throttle_Scale_Min=215;
-const int Throttle_Scale_Max=855;
+const int Throttle_Scale_Max=848;
 const int Throttle_RampUpTime0=2000;      //ramp up time in ms at 0 speed (must be <= 10000 (10s))
 const int Throttle_RampUpTime1=0;         //ramp up time in ms at RampUpMaxSpeed
 const int Throttle_RampUpMaxSpeed=15;     //ramp up time will scale linearly between 0 and RampUpMaxSpeed 

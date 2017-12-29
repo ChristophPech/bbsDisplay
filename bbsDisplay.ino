@@ -24,6 +24,8 @@ void setup() {
   //Timer0 1ms interrupt
   OCR0A = 0xAF;
   TIMSK0 |= _BV(OCIE0A);
+
+  sei();
 }
 
 SIGNAL(TIMER0_COMPA_vect)
@@ -66,10 +68,11 @@ void loop()
  RTC_ReadTime_Local();
  Storage_Tick();
  Gfx_Render();
- delay(100);
+ delay(50);
+
 
  //if(loopCnt==5)   iBatVolt=54800;
  //if(loopCnt==100)   iBatVolt=46100;
- if(loopCnt==20) Test();
+ //if(loopCnt==20) Test();
 
 }

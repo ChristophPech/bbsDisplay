@@ -13,9 +13,11 @@ uint16_t Released_Mid=0;
 bool modeRoad=true;
 uint8_t curSeq[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; //32+3
 
-long throttleScaled=0;
 long batterySum=0;
 long batteryCount=0;
+
+long throttleSum=0;
+long throttleCount=0;
 
 long moveSum=0;
 long moveMSCount=0;
@@ -97,6 +99,37 @@ void Ctrl_Init()
   TCCR3B = _BV(CS00);
   pinMode(Pin_ThrottleOut, OUTPUT);
   analogWrite(5,255);
+
+ 
+  ADCSRA = (1<<ADEN) | (1<<ADSC) | (1<<ADIE) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); // enable ADC, 128 clk divider
+  ADCSRB = 0;
+}
+
+ISR(ADC_vect) {
+  static int iAnalogIn=0; //0=throttle,1=battery
+
+  int aval = ADCL;    // store lower byte ADC
+  aval += ADCH << 8;  // store higher bytes ADC
+  
+  if(iAnalogIn==0) {
+    throttleSum+=aval;
+    throttleCount++;
+  } else {
+    batterySum+=aval;
+    batteryCount++;
+  }
+
+  iAnalogIn++;
+  if(iAnalogIn>1) iAnalogIn=0;
+  int pin=Pin_ThrottleIn;
+  if(iAnalogIn==1) pin=Pin_BatVolt;
+  if (pin >= 18) pin -= 18; // allow for channel or pin numbers
+  int chan=analogPinToChannel(pin);
+
+  ADCSRB = (ADCSRB & ~(1 << MUX5)) | (((chan >> 3) & 0x01) << MUX5);
+  ADMUX = (1<<REFS0) | (chan & 0x07);
+  
+  ADCSRA|=(1<< ADSC); //next conversion
 }
 
 //key debouncing 5ms
@@ -130,25 +163,15 @@ void Ctrl_Tick()
   int iM=HandleBtn(Pin_Minus,Pressed_Minus,Released_Minus);
   int iI=HandleBtn(Pin_Mid,Pressed_Mid,Released_Mid);
 
-  if(Pin_BatVolt) {
-    static int bat_smaple_tick=0;
-    bat_smaple_tick++;
-    if(bat_smaple_tick>=1)
-    {
-      bat_smaple_tick=0;
-      int v=analogRead(Pin_BatVolt);
-      batterySum+=v;
-      batteryCount++;
-      if(batteryCount>=1000) {
-        iBatVolt=(batterySum*Battery_mV_per_count)/(batteryCount*1);
-        //throttleScaled=iBatVolt;
-        batterySum=0;
-        batteryCount=0;
-      }
-    };
+  if(Pin_BatVolt&&batteryCount>1000) {
+    iBatVolt=(batterySum*Battery_100uV_per_count)/(batteryCount*10);
+    //throttleScaled=iBatVolt;
+    batterySum=0;
+    batteryCount=0;
   }
-  if(Pin_ThrottleIn) {
-    int v=analogRead(Pin_ThrottleIn);
+  if(Pin_ThrottleIn&&throttleCount>0) {
+    long v=throttleSum/throttleCount;
+    throttleSum=0;throttleCount=0;
     //throttleScaled=v;
     v-=Throttle_Scale_Min;
     if(v<0) v=0;
@@ -178,6 +201,7 @@ void Ctrl_Tick()
     
     //iThrottle=throttleScaled;
   }
+  
   if(Pin_ThrottleOut)
   {
     int i=25+(iThrottle/55);
