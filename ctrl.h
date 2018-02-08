@@ -32,18 +32,6 @@ const int Btn_Mid=3;
 extern bool modeRoad;
 
 const unsigned char ROADMODE_SEQ[] PROGMEM = {
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Minus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Minus<<4)|Seq_Norm,
-  (Btn_Minus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Long,
-  (Btn_Minus<<4)|Seq_Long,
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Norm,
-  (Btn_Plus<<4)|Seq_Norm,
   0
 };
 
