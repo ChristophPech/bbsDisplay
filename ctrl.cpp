@@ -85,7 +85,7 @@ void OnBtnClick(int btn,int mode)
 void OnModeRoad(bool val) {
   modeRoad=val;
   OnPAS(0);
-  Serial.println("modeRoad");
+  //Serial.println("modeRoad");
 }
 
 void Ctrl_Init()
@@ -170,6 +170,7 @@ void Ctrl_Tick()
     batteryCount=0;
   }
   if(Pin_ThrottleIn&&throttleCount>0) {
+    //throttleSum=800;throttleCount=1;
     long v=throttleSum/throttleCount;
     throttleSum=0;throttleCount=0;
     //throttleScaled=v;
@@ -207,6 +208,8 @@ void Ctrl_Tick()
     int i=25+(iThrottle/55);
     if(i>255) i=255;
     if(modeRoad) i=0;
+    //give it time to settle, it should take 33ms to transmit the 4 byte PAS, let's go a bit lower since the PAS sensor needs to pick up a couple of signals before engaging
+    //if(ThrottlePasBugfix&&iPushState<20) i=0;
     analogWrite(Pin_ThrottleOut,i);
   }
   if(modeRoad)

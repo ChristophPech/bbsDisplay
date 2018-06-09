@@ -4,6 +4,7 @@
 #include "ctrl.h"
 
 bool bLightOn=false;
+int iPushState=0;
 int recvTimeOut=0;
 int recvLastBytes=0;
 
@@ -24,7 +25,18 @@ void SendPAS()
     case 8: i=0x17; break;
     case 9: i=0x03; break;
   }
-  
+
+  if(iPas==-1||(iThrottle>0&&ThrottlePasBugfix)) {
+    if(iPushState<=0) {
+      iPushState=1;
+      i=0x06;
+    } else if(iPushState==1) {
+      iPushState=2;
+    }
+  } else {
+    iPushState=0;
+  }
+
   Serial1.write(uint8_t(0x16));
   Serial1.write(uint8_t(0x0b));
   Serial1.write(uint8_t(i));
@@ -168,6 +180,8 @@ void RecvBattery()
 unsigned int cmdCycle=-1;
 void Comm_Tick()
 {
+  if(iPushState>=2&&iPushState<100) iPushState++;
+  
   int w=Serial1.availableForWrite();
   if(w<63) return;
   //Serial.println(w);
@@ -221,8 +235,10 @@ void Comm_Tick()
   
   
   if(w<63) return;
-  //Serial.println(w);
   cmdCycle++;
+
+  //priorize PAS
+  if(iThrottle>0&&ThrottlePasBugfix&&iPushState<2) {SendPAS();return;}
 
   if(cmdCycle==10) {ReqSpeed();return;};
   if(cmdCycle==20) {SendPAS();return;};

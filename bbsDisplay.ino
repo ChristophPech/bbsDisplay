@@ -18,7 +18,7 @@ void setup() {
   Ctrl_Init();
 
   //RTC_ReadTime_UTC();
-  //RTC_WriteTime_UTC(2017,12,20,15,23,0);
+  //RTC_WriteTime_UTC(2018,6,9,11,55,0);
   //RTC_WriteTime_UTC(2017,RTC.mm,RTC.dd,RTC.h,RTC.m,RTC.s);
 
   //Timer0 1ms interrupt
@@ -74,5 +74,6 @@ void loop()
  //if(loopCnt==5)   iBatVolt=54800;
  //if(loopCnt==100)   iBatVolt=46100;
  //if(loopCnt==20) Test();
-
+ if(loopCnt%10==2) Serial.println(iThrottle);
+ if(loopCnt%10==2) Serial.println(iPushState);
 }

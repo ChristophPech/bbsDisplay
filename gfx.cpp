@@ -22,7 +22,7 @@ int iThrottle=0;
 long iBatVoltSmooth=iBatVolt;
 int iBatLevel=0;
 long iSpeed_copy=0;
-int iPower_copy=0;
+long iPower_copy=0;
 int iPas_copy=0;
 
 void gfx_draw(void) {
@@ -33,21 +33,21 @@ void gfx_draw(void) {
   //u8g.setFont(u8g2_font_blipfest_07_t);
   u8g.setFont(u8g_font_04b_03r);
   sprintf(buffer, "%02d.%02d.%02d", RTC.dd,RTC.mm,RTC.yyyy%100);
-  u8g.drawStr( 1, 6, buffer);
+  u8g.drawStr( 1, 10, buffer);
 
   iS=(millis()/1000)%60;
   sprintf(buffer, "%02d:%02d:%02d",RTC.h,RTC.m, RTC.s);
   //iW=u8g.getStrPixelWidth(buffer);
   iW=4*8+3;
-  u8g.drawStr( 128-iW, 6, buffer);
+  u8g.drawStr( 128-iW, 10, buffer);
 
-  u8g.drawStr( 106, 40, Label_Speed);
-  if(!modeRoad) u8g.drawStr( 106, 50, "W");
+  u8g.drawStr( 106, 44, Label_Speed);
+  if(!modeRoad) u8g.drawStr( 106, 54, "W");
 
   long dm=curState.distTrip/10;
   sprintf(buffer, "%ld.%03ld %s", dm/1000,dm%1000,Label_Dist);
   iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 1, 53, buffer);
+  u8g.drawStr( 1, 49, buffer);
 
   iH=curState.timeTrip/3600;
   iM=(curState.timeTrip%3600)/60;
@@ -58,33 +58,33 @@ void gfx_draw(void) {
     sprintf(buffer, "%d:%02d", iM,iS);
   }
   iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 1, 46, buffer);
+  u8g.drawStr( 1, 42, buffer);
 
-
-  sprintf(buffer, "%d", iPower_copy);
+  sprintf(buffer, "%d", (iPower_copy*iBatVoltSmooth)/1000);
   iW=u8g.getStrWidth(buffer);
-  if(!modeRoad) u8g.drawStr( 100-iW, 50, buffer);
+  if(!modeRoad) u8g.drawStr( 100-iW, 54, buffer);
 
-  u8g.drawXBMP( 1, 10, 16, 7, imgBatt);
+  int8_t iBatY=14;
+  u8g.drawXBMP( 1, iBatY, 16, 7, imgBatt);
   int v=(iBatVoltSmooth+50)/100;
   sprintf(buffer, "%d.%dV", v/10,v%10);
-  u8g.drawStr( 19, 16, buffer);
+  u8g.drawStr( 19, iBatY+6, buffer);
 
   if(iBatLevel==0) {
     u8g.setColorIndex(0); 
-    u8g.drawBox(1+2,10+2,11,3);
+    u8g.drawBox(1+2,iBatY+2,11,3);
     u8g.setColorIndex(1);
   } else if(iBatLevel==1) {
     u8g.setColorIndex(0); 
-    u8g.drawBox(1+5,10+2,8,3);
+    u8g.drawBox(1+5,iBatY+2,8,3);
     u8g.setColorIndex(1);
   } else if(iBatLevel==2) {
     u8g.setColorIndex(0); 
-    u8g.drawBox(1+8,10+2,5,3);
+    u8g.drawBox(1+8,iBatY+2,5,3);
     u8g.setColorIndex(1);
   } else if(iBatLevel==3) {
     u8g.setColorIndex(0); 
-    u8g.drawBox(1+11,10+2,2,3);
+    u8g.drawBox(1+11,iBatY+2,2,3);
     u8g.setColorIndex(1);
   }
 
@@ -113,13 +113,13 @@ void gfx_draw(void) {
   if(errMsg)
   {
     iW=u8g.getStrWidth(errMsg);
-    u8g.drawStr( 128-iW, 63, errMsg);
+    u8g.drawStr( 128-iW, 59, errMsg);
   }
   else
   {
     sprintf(buffer, "%ld %s", curState.distAll/10000,Label_Dist);
     iW=u8g.getStrWidth(buffer);
-    u8g.drawStr( 1, 63, buffer);
+    u8g.drawStr( 1, 59, buffer);
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ void gfx_draw(void) {
   const char* pas[]={"push","off","eco","normal","turbo",">",">>",">>>",">>>>",">>>>>",">>>>>>"};
   sprintf(buffer, "%s", pas[iPas_copy+1]);
   iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 64-iW/2, 10, buffer);
+  u8g.drawStr( 64-iW/2, 12, buffer);
 
 
   ////////////////////////////////////////////////////////////////////
@@ -137,16 +137,16 @@ void gfx_draw(void) {
   iS=iSpeed_copy/1000;
   sprintf(buffer, "%d", iS%10);
   iW=u8g.getStrWidth(buffer);
-  u8g.drawStr( 98-iW, 40, buffer);
+  u8g.drawStr( 98-iW, 44, buffer);
   if(iSpeed_copy>10) {
     sprintf(buffer, "%d", iS/10);
     iW=u8g.getStrWidth(buffer);
-    u8g.drawStr( 78-iW, 40, buffer);
+    u8g.drawStr( 78-iW, 44, buffer);
   }
 
   if(!modeRoad) {
     iW=(iThrottle/500);
-    u8g.drawHLine(128-iW,63,iW);
+    u8g.drawHLine(128-iW,59,iW);
   }
 }
 
