@@ -60,7 +60,7 @@ void gfx_draw(void) {
   iW=u8g.getStrWidth(buffer);
   u8g.drawStr( 1, 42, buffer);
 
-  sprintf(buffer, "%d", (iPower_copy*iBatVoltSmooth)/1000);
+  sprintf(buffer, "%d", (iPower_copy*iBatVoltSmooth)/2000);
   iW=u8g.getStrWidth(buffer);
   if(!modeRoad) u8g.drawStr( 100-iW, 54, buffer);
 
